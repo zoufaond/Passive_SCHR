@@ -115,12 +115,14 @@ class SCHR:
         Uh_sub = Uh.subs(self.x,xh)
         U_celk = Us_sub+Uh_sub
         d_U_celk = sp.diff(U_celk,dd)
-        return U_celk, d_U_celk
+        return U_celk, d_U_celk, Us_sub, Uh_sub
         
-    def lambdified(self, U_c,d_U_c):
+    def lambdified(self, U_c,d_U_c, Us_sub,Uh_sub):
         Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],U_c, 'numpy')
         d_Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],d_U_c, 'numpy')
-        return Uc_np, d_Uc_np
+        Us_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],Us_sub, 'numpy')
+        Uh_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],Uh_sub, 'numpy')
+        return Uc_np, d_Uc_np, Us_np, Uh_np
         
     def graphs_scapula_position(self,U_C_np,dU_C_np,alfa_start=0.1,alfa_end=140,koefs=3,koefh=3,init_root=0.1):
         self.init_root = init_root
@@ -177,7 +179,7 @@ class SCHR:
         axs[1].legend()
         plt.show()
         
-    def scapula_position_argmin(self,U_C_np,koefs,koefh,N=100):
+    def scapula_position_argmin(self,U_C_np,Us_np,Uh_np,xs_np,xh_np,koefs,koefh,N=100,if_cond = False):
         ## U_C_np = [x=phis, alfa, pomery, koefs, koefh]
         alfa_start = 0.1
         alfa_end = 140*np.pi/180
@@ -188,12 +190,34 @@ class SCHR:
         max_pomer = 5
         pomery = np.linspace(min_pomer,max_pomer,NG)
         
+#         if if_cond:
+#             for j, pomer in enumerate(pomery):
+#                 for i, alfa in enumerate(alfavec):
+#                     phis = np.linspace(0,alfa,N)
+#                     Us = np.zeros(N)
+#                     Uh = np.zeros(N)
+#                     for k, phi in enumerate(phis):
+#                         if xs_np(phi,alfa) <= self.l0s:
+#                             Us[k] = 0
+#                         else:
+#                             Us[k] = Us_np(phi, alfa, pomer, koefs, koefh)
+
+#                         if xh_np(phi,alfa) <= self.l0h:
+#                             Uh[k] = 0
+#                         else:
+#                             Uh[k] = Uh_np(phi, alfa, pomer, koefs, koefh)
+#                     U_C_min[i] = phis[(Us+Uh).argmin()]
+
+#                 plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
+                
+#           else:
         for j, pomer in enumerate(pomery):
             for i, alfa in enumerate(alfavec):
                 phis = np.linspace(0,alfa,N)
                 U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh).argmin()]
-                
+
             plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
+                
         plt.legend()
         plt.show()
         # plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi)
