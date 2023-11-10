@@ -21,8 +21,8 @@ class SCHR:
     
     def geometry_init(self):
         self.phih = self.alfa-self.phi0-self.phis
-        xs = sp.sqrt(self.a**2+self.b**2-2*self.a*self.b*sp.cos(self.phis))+1
-        xh = sp.sqrt(self.c**2+self.d**2-2*self.c*self.d*sp.cos(self.phih))+1
+        xs = sp.sqrt(self.a**2+self.b**2-2*self.a*self.b*sp.cos(self.phis))+0.2
+        xh = sp.sqrt(self.c**2+self.d**2-2*self.c*self.d*sp.cos(self.phih))+0.2
         xs_np = sp.lambdify([self.phis,self.alfa],xs, 'numpy')
         xh_np = sp.lambdify([self.phis,self.alfa],xh, 'numpy')
         return xs, xh, xs_np, xh_np
@@ -176,6 +176,29 @@ class SCHR:
         axs[0].legend()
         axs[1].legend()
         plt.show()
+        
+    def scapula_position_argmin(self,U_C_np,koefs,koefh,N=100):
+        ## U_C_np = [x=phis, alfa, pomery, koefs, koefh]
+        alfa_start = 0.1
+        alfa_end = 140*np.pi/180
+        alfavec = np.linspace(alfa_start,alfa_end,N)
+        U_C_min = np.zeros(N)
+        NG = 10
+        min_pomer = 0.1
+        max_pomer = 5
+        pomery = np.linspace(min_pomer,max_pomer,NG)
+        
+        for j, pomer in enumerate(pomery):
+            for i, alfa in enumerate(alfavec):
+                phis = np.linspace(0,alfa,N)
+                U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh).argmin()]
+                
+            plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
+        plt.legend()
+        plt.show()
+        # plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi)
+            
+        
         
     def graphs_potential_energy(self,U_C_np,alfa1=40,alfa2=70,alfa3=100,alfa4=130):
         alfa = np.array([alfa1,alfa2,alfa3,alfa4])*np.pi/180
