@@ -19,10 +19,10 @@ class SCHR:
         self.alfa = alfa
         self.x = x
     
-    def geometry_init(self):
+    def geometry_init(self,konsts,konsth):
         self.phih = self.alfa-self.phi0-self.phis
-        xs = sp.sqrt(self.a**2+self.b**2-2*self.a*self.b*sp.cos(self.phis))+0.2
-        xh = sp.sqrt(self.c**2+self.d**2-2*self.c*self.d*sp.cos(self.phih))+0.2
+        xs = sp.sqrt(self.a**2+self.b**2-2*self.a*self.b*sp.cos(self.phis))+konsts
+        xh = sp.sqrt(self.c**2+self.d**2-2*self.c*self.d*sp.cos(self.phih))+konsth
         xs_np = sp.lambdify([self.phis,self.alfa],xs, 'numpy')
         xh_np = sp.lambdify([self.phis,self.alfa],xh, 'numpy')
         return xs, xh, xs_np, xh_np
@@ -181,10 +181,10 @@ class SCHR:
         
     def scapula_position_argmin(self,U_C_np,Us_np,Uh_np,xs_np,xh_np,koefs,koefh,N=100,if_cond = False):
         ## U_C_np = [x=phis, alfa, pomery, koefs, koefh]
-        alfa_start = 0.1
-        alfa_end = 140*np.pi/180
+        alfa_start = 0.1*np.pi/180
+        alfa_end = 180*np.pi/180
         alfavec = np.linspace(alfa_start,alfa_end,N)
-        U_C_min = np.zeros(N)
+        self.U_C_min = np.zeros(N)
         NG = 10
         min_pomer = 0.1
         max_pomer = 5
@@ -211,16 +211,20 @@ class SCHR:
 #                 plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
                 
 #           else:
+        fig,axs = plt.subplots(3,figsize=(10, 20))
         for j, pomer in enumerate(pomery):
             for i, alfa in enumerate(alfavec):
                 phis = np.linspace(0,alfa,N)
-                U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh).argmin()]
+                self.U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh).argmin()]
 
-            plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
-                
-        plt.legend()
-        plt.show()
+            axs[0].plot(alfavec*180/np.pi,self.U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
+            axs[1].plot(alfavec*180/np.pi,xs_np(self.U_C_min,alfavec)/self.l0s)
+            axs[2].plot(alfavec*180/np.pi,xh_np(self.U_C_min,alfavec)/self.l0h)
+            
+        axs[0].tick_params(labeltop=True, labelright=True)       
+        axs[0].legend()
         # plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi)
+        
             
         
         

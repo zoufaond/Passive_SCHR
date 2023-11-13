@@ -1,0 +1,37 @@
+## 1.
+
+a=0.045
+b=a
+c=0.032
+d=c
+
+model = classes2.SCHR(phis=phis,alfa=alfa,x=x,l0s=0.11,   l0h=0.14,a=a,b=b,c=c,d=d)
+xs, xh,xs_np,xh_np = model.geometry_init(konsts = 0.11,konsth=0.14)
+# Fs,Fh, Us, Uh = model.nonlinear_spring_init(pomery=pomery,koefs=koefs,koefh=koefh,akt_f=True)
+Fs,Fh,Us,Uh = model.thelen_03_muscle_pas_force(pomery=pomery,koefs=koefs,koefh=koefh,akt_f = False)
+u_celk, dU_celk, Us_sub, Uh_sub = model.potential_energy(Us,Uh,xs,xh,phis)
+Uc_np, d_Uc_np, Us_np, Uh_np = model.lambdified(u_celk,dU_celk,Us_sub,Uh_sub)
+
+koefs = 5.9
+koefh = 5.5
+model.scapula_position_argmin(Uc_np,Us_np, Uh_np,xs_np,xh_np, koefs, koefh, N=1000)
+
+## 2. alfa od 0 do 180, l0 nastavene cca podle wua
+
+phis,alfa,pomery,x,koefs,koefh = sp.symbols('phis,alfa,pomery,x,koefs,koefh')
+pomer = 1.8
+a=0.07
+b=a
+c=a/pomer
+d=c
+
+model = classes2.SCHR(phis=phis,alfa=alfa,x=x,l0s=0.09,   l0h=0.09,a=a,b=b,c=c,d=d)
+xs, xh,xs_np,xh_np = model.geometry_init(konsts = 0.09,konsth=0.09)
+# Fs,Fh, Us, Uh = model.nonlinear_spring_init(pomery=pomery,koefs=koefs,koefh=koefh,akt_f=True)
+Fs,Fh,Us,Uh = model.thelen_03_muscle_pas_force(pomery=pomery,koefs=koefs,koefh=koefh,akt_f = False)
+u_celk, dU_celk, Us_sub, Uh_sub = model.potential_energy(Us,Uh,xs,xh,phis)
+Uc_np, d_Uc_np, Us_np, Uh_np = model.lambdified(u_celk,dU_celk,Us_sub,Uh_sub)
+
+koefs = 5.4
+koefh = 5
+model.scapula_position_argmin(Uc_np,Us_np, Uh_np,xs_np,xh_np, koefs, koefh, N=1000)
