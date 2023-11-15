@@ -35,3 +35,25 @@ Uc_np, d_Uc_np, Us_np, Uh_np = model.lambdified(u_celk,dU_celk,Us_sub,Uh_sub)
 koefs = 5.4
 koefh = 5
 model.scapula_position_argmin(Uc_np,Us_np, Uh_np,xs_np,xh_np, koefs, koefh, N=1000)
+
+## i s koeficinety epsm0s/h
+
+phis,alfa,pomery,x,koefs,koefh,epsm0s,epsm0h = sp.symbols('phis,alfa,pomery,x,koefs,koefh,epsm0s,epsm0h')
+pomer = 2.2
+a=0.09
+b=a
+c=a/pomer
+d=c
+
+model = classes2.SCHR(phis=phis,alfa=alfa,x=x,l0s=0.13,   l0h=0.1,a=a,b=b,c=c,d=d)
+xs, xh,xs_np,xh_np = model.geometry_init(konsts = 0.13,konsth=0.1)
+# Fs,Fh, Us, Uh = model.nonlinear_spring_init(pomery=pomery,koefs=koefs,koefh=koefh,akt_f=True)
+Fs,Fh,Us,Uh = model.thelen_03_muscle_pas_force(pomery=pomery,koefs=koefs,koefh=koefh,epsm0s=epsm0s,epsm0h=epsm0h,akt_f = False)
+u_celk, dU_celk, Us_sub, Uh_sub = model.potential_energy(Us,Uh,xs,xh,phis)
+Uc_np, d_Uc_np, Us_np, Uh_np = model.lambdified(u_celk,dU_celk,Us_sub,Uh_sub)
+
+koefs = 5
+koefh = 5
+epsm0s = 0.5
+epsm0h = 0.55
+model.scapula_position_argmin(Uc_np,Us_np, Uh_np,xs_np,xh_np, koefs, koefh, epsm0s,epsm0h, N=1000)

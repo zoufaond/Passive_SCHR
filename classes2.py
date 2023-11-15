@@ -76,22 +76,25 @@ class SCHR:
         
         return Fs,Fh,Us,Uh
     
-    def thelen_03_muscle_pas_force(self,pomery,koefs,koefh,akt_f = True,a_fun_coef=1000):
+    def thelen_03_muscle_pas_force(self,pomery,koefs,koefh,epsm0s,epsm0h,akt_f = True,a_fun_coef=1000):
         self.pomery = pomery
         self.koefs = koefs
         self.koefh = koefh
+        self.epsm0s = epsm0s
+        self.epsm0h = epsm0h
         kh = 1
         ks = kh*self.pomery
-        epsm0=0.6
+        self.epsm0s = epsm0s
+        self.epsm0h = epsm0h
         
         if akt_f:
             a_funs = 1/(1+sp.exp(a_fun_coef*(self.l0s-self.x)))
             a_funh = 1/(1+sp.exp(a_fun_coef*(self.l0h-self.x)))
             lms = self.x/self.l0s
-            Fs = ((sp.exp(self.koefs*(lms-1)/epsm0)-1)/(sp.exp(self.koefs)-1))*ks
+            Fs = ((sp.exp(self.koefs*(lms-1)/self.epsm0s)-1)/(sp.exp(self.koefs)-1))*ks
 
             lmh = self.x/self.l0h
-            Fh = ((sp.exp(self.koefh*(lmh-1)/epsm0)-1)/(sp.exp(self.koefh)-1))*kh
+            Fh = ((sp.exp(self.koefh*(lmh-1)/self.epsm0h)-1)/(sp.exp(self.koefh)-1))*kh
 
             Us_wo = sp.integrate(Fs,(self.x,self.l0s,self.x))
             Uh_wo = sp.integrate(Fh,(self.x,self.l0h,self.x))
@@ -100,10 +103,10 @@ class SCHR:
         
         else:
             lms = self.x/self.l0s
-            Fs = ((sp.exp(self.koefs*(lms-1)/epsm0)-1)/(sp.exp(self.koefs)-1))*ks
+            Fs = ((sp.exp(self.koefs*(lms-1)/self.epsm0s)-1)/(sp.exp(self.koefs)-1))*ks
 
             lmh = self.x/self.l0h
-            Fh = ((sp.exp(self.koefh*(lmh-1)/epsm0)-1)/(sp.exp(self.koefh)-1))*kh
+            Fh = ((sp.exp(self.koefh*(lmh-1)/self.epsm0h)-1)/(sp.exp(self.koefh)-1))*kh
 
             Us = sp.integrate(Fs,(self.x,self.l0s,self.x))
             Uh = sp.integrate(Fh,(self.x,self.l0h,self.x))
@@ -118,10 +121,10 @@ class SCHR:
         return U_celk, d_U_celk, Us_sub, Uh_sub
         
     def lambdified(self, U_c,d_U_c, Us_sub,Uh_sub):
-        Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],U_c, 'numpy')
-        d_Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],d_U_c, 'numpy')
-        Us_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],Us_sub, 'numpy')
-        Uh_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh],Uh_sub, 'numpy')
+        Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh,self.epsm0s,self.epsm0h],U_c, 'numpy')
+        d_Uc_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh,self.epsm0s,self.epsm0h],d_U_c, 'numpy')
+        Us_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh,self.epsm0s,self.epsm0h],Us_sub, 'numpy')
+        Uh_np = sp.lambdify([self.phis,self.alfa,self.pomery,self.koefs,self.koefh,self.epsm0s,self.epsm0h],Uh_sub, 'numpy')
         return Uc_np, d_Uc_np, Us_np, Uh_np
         
     def graphs_scapula_position(self,U_C_np,dU_C_np,alfa_start=0.1,alfa_end=140,koefs=3,koefh=3,init_root=0.1):
@@ -179,7 +182,7 @@ class SCHR:
         axs[1].legend()
         plt.show()
         
-    def scapula_position_argmin(self,U_C_np,Us_np,Uh_np,xs_np,xh_np,koefs,koefh,N=100,if_cond = False):
+    def scapula_position_argmin(self,U_C_np,Us_np,Uh_np,xs_np,xh_np,koefs,koefh,epsm0s,epsm0h,N=100,if_cond = False):
         ## U_C_np = [x=phis, alfa, pomery, koefs, koefh]
         alfa_start = 0.1*np.pi/180
         alfa_end = 180*np.pi/180
@@ -190,76 +193,51 @@ class SCHR:
         max_pomer = 5
         pomery = np.linspace(min_pomer,max_pomer,NG)
         
-#         if if_cond:
-#             for j, pomer in enumerate(pomery):
-#                 for i, alfa in enumerate(alfavec):
-#                     phis = np.linspace(0,alfa,N)
-#                     Us = np.zeros(N)
-#                     Uh = np.zeros(N)
-#                     for k, phi in enumerate(phis):
-#                         if xs_np(phi,alfa) <= self.l0s:
-#                             Us[k] = 0
-#                         else:
-#                             Us[k] = Us_np(phi, alfa, pomer, koefs, koefh)
-
-#                         if xh_np(phi,alfa) <= self.l0h:
-#                             Uh[k] = 0
-#                         else:
-#                             Uh[k] = Uh_np(phi, alfa, pomer, koefs, koefh)
-#                     U_C_min[i] = phis[(Us+Uh).argmin()]
-
-#                 plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
-                
-#           else:
         fig,axs = plt.subplots(3,figsize=(10, 20))
         for j, pomer in enumerate(pomery):
             for i, alfa in enumerate(alfavec):
                 phis = np.linspace(0,alfa,N)
-                self.U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh).argmin()]
+                self.U_C_min[i] = phis[U_C_np(phis, alfa, pomer, koefs, koefh, epsm0s, epsm0h).argmin()]
 
             axs[0].plot(alfavec*180/np.pi,self.U_C_min*180/np.pi,label='ks/kh = %s' % round(pomer,2))
             axs[1].plot(alfavec*180/np.pi,xs_np(self.U_C_min,alfavec)/self.l0s)
             axs[2].plot(alfavec*180/np.pi,xh_np(self.U_C_min,alfavec)/self.l0h)
             
         axs[0].tick_params(labeltop=True, labelright=True)       
-        axs[0].legend()
-        # plt.plot(alfavec*180/np.pi,U_C_min*180/np.pi)
-        
+        axs[0].legend()       
             
         
         
     def graphs_potential_energy(self,U_C_np,alfa1=40,alfa2=70,alfa3=100,alfa4=130):
         alfa = np.array([alfa1,alfa2,alfa3,alfa4])*np.pi/180
         phis = np.linspace(0,alfa,100)
-        koefs = np.array([1.5,2.5,3.5])
-        koefh = np.array([1.5,2.5,3.5])
-        N_koef = len(koefs)*len(koefh)
+        epsm0s = np.array([0.5,0.55,0.6])
+        epsm0h = np.array([0.5,0.55,0.6])
+        N_epsm0 = len(epsm0s)*len(epsm0h)
         N_alfa = len(alfa)
         NG = 10
         min_pomer = 0.1
         max_pomer = 5
         pomery = np.linspace(min_pomer,max_pomer,NG)
-        l0s = 0
-        l0h = 0
 
-        fig, axs = plt.subplots(N_koef,N_alfa, figsize=(25, 30))
+        fig, axs = plt.subplots(N_epsm0,N_alfa, figsize=(25, 30))
         # fig.suptitle('vlevo - root, vpravo - minimize')
         labels = ['1','2','3','4']
         # for i in range(len(pomery)):
         #     labels.append("ks/kh = %s " % round(pomery[i],2))
-        for i in range(len(koefs)):
-            for j in range(len(koefh)):
+        for i in range(len(epsm0s)):
+            for j in range(len(epsm0h)):
                 for k in range(len(pomery)):
-                    UC = U_C_np(phis,alfa,pomery[k],koefs[i],koefh[j])
+                    UC = U_C_np(phis,alfa,pomery[k],5,5,epsm0s[i],epsm0h[j])
                     for a in range(len(alfa)):
                         ## minimum UC
                         min_UC = UC[:,a].argmin()
-                        axs[j+len(koefs)*i,a].plot(phis[min_UC,a]*180/np.pi,UC[min_UC,a],'*')
+                        axs[j+len(epsm0s)*i,a].plot(phis[min_UC,a]*180/np.pi,UC[min_UC,a],'*')
                         ## 
 
-                        axs[j+len(koefs)*i,a].plot(phis[:,a]*180/np.pi,UC[:,a],label='ks/kh = %s' % round(pomery[k],2))
-                        axs[j+len(koefs)*i,a].title.set_text('koefs = %s, koefh = %s ' % (koefs[i],koefh[j]))
-                        axs[j+len(koefs)*i,a].set_yscale('log')
+                        axs[j+len(epsm0s)*i,a].plot(phis[:,a]*180/np.pi,UC[:,a],label='ks/kh = %s' % round(pomery[k],2))
+                        axs[j+len(epsm0s)*i,a].title.set_text('epsm0s = %s, epsm0h = %s ' % (epsm0s[i],epsm0h[j]))
+                        axs[j+len(epsm0s)*i,a].set_yscale('log')
 
         # lines = []
         # labels = []
