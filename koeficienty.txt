@@ -57,3 +57,11 @@ koefh = 5
 epsm0s = 0.5
 epsm0h = 0.55
 model.scapula_position_argmin(Uc_np,Us_np, Uh_np,xs_np,xh_np, koefs, koefh, epsm0s,epsm0h, N=1000)
+
+
+## classes3
+pro thelena
+    t1 = [-0.1,-0.3]
+    s1 = [0,-0.2]
+    s2 = [0.12,-0.1]
+    h2 = [0.08,0]
