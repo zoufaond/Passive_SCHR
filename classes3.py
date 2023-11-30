@@ -37,9 +37,6 @@ class SCHR:
         self.F_muscles = []
         self.U_muscles_np = []
         
-    def geometry(self,angle,x,y):
-        pos = R_phi(angle)*r(x,y)
-        return pos
     
     def add_muscle(self,l0=1,koef=5,epsm0=0.5,F_iso=1,thorax_ins=None,scap_ins=None,humer_ins=None,muscle_group='ThorScap',muscle_model='Thelen'):
         if muscle_group=='ThorScap':
