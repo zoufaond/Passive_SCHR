@@ -140,6 +140,13 @@ class SCHR:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+                    
+        elif name == 'wochatz_2021':
+            path = r'..\Passive_SCHR\articles_graphs\wochatz_2021\wochatz_2021.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
         return humerus,scapula
                     
         
