@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import warnings
+import csv
 
 def T_x(x):
     trans_x = sp.Matrix([[1,0,x],
@@ -37,9 +38,6 @@ class SCHR:
         self.F_muscles = []
         self.U_muscles_np = []
         
-    def geometry(self,angle,x,y):
-        pos = R_phi(angle)*r(x,y)
-        return pos
     
     def add_muscle(self,l0=1,koef=5,epsm0=0.5,F_iso=1,thorax_ins=None,scap_ins=None,humer_ins=None,muscle_group='ThorScap',muscle_model='Thelen'):
         if muscle_group=='ThorScap':
@@ -111,5 +109,44 @@ class SCHR:
         return U_min,alfa_vec
         # plt.plot(alfa_vec*180/np.pi,U_min*180/np.pi)
         # plt.show()
+        
+    def articles_passive(name):
+        humerus = []
+        scapula = []
+        if name == 'price_2000':
+            path = r'..\Passive_SCHR\articles_graphs\price_2000\price_2000.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+                    
+        elif name == 'lee_2020':
+            path = r'..\Passive_SCHR\articles_graphs\lee_2020\lee_2020.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+                    
+        elif name == 'ebaugh_2005':
+            path = r'..\Passive_SCHR\articles_graphs\ebaugh_2005\ebaugh_2005.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+                    
+        elif name == 'kai_2016':
+            path = r'..\Passive_SCHR\articles_graphs\kai_2016\kai_2016.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+                    
+        elif name == 'wochatz_2021':
+            path = r'..\Passive_SCHR\articles_graphs\wochatz_2021\wochatz_2021.csv'
+            with open(path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    (humerus.append(float(row['x'])), scapula.append(float(row['Curve1'])))
+        return humerus,scapula
                 
         
