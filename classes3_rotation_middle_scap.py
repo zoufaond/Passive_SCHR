@@ -96,7 +96,7 @@ class SCHR:
     
     def scapula_position(self,U_celk):
         alfa_start = 0
-        alfa_end = 140*np.pi/180
+        alfa_end = 150*np.pi/180
         N_alfa = 1000
         alfa_vec = np.linspace(alfa_start,alfa_end)
         N_phis = 1000
